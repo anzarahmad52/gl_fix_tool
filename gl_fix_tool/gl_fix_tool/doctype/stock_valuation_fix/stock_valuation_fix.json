@@ -17,10 +17,9 @@
   "fetch_current_state",
   "preview_adjustment",
   "show_bundles",
-  "create_revaluation_entry",
-  "column_break_yqnj",
   "update_source_entry",
   "repost_valuation",
+  "column_break_yqnj",
   "section_current",
   "qty_on_hand",
   "current_valuation_rate",
@@ -197,13 +196,6 @@
    "label": "Posting Time"
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
-   "fieldname": "create_revaluation_entry",
-   "fieldtype": "Button",
-   "hidden": 1,
-   "label": "Create Stock Reconciliation"
-  },
-  {
    "bold": 1,
    "depends_on": "eval:doc.docstatus==1",
    "fieldname": "repost_valuation",
@@ -283,7 +275,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2025-12-04 16:17:30.539945",
+ "modified": "2025-12-04 20:00:00",
  "modified_by": "Administrator",
  "module": "Gl Fix Tool",
  "name": "Stock Valuation Fix",
