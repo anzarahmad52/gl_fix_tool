@@ -1,305 +1,239 @@
-{
- "actions": [],
- "allow_import": 1,
- "autoname": "SVFIX-.YYYY.-.####",
- "creation": "2025-01-01 00:00:00",
- "doctype": "DocType",
- "engine": "InnoDB",
- "field_order": [
-  "company",
-  "item_code",
-  "warehouse",
-  "column_break_orbs",
-  "valuation_date",
-  "posting_date",
-  "posting_time",
-  "section_actions",
-  "fetch_current_state",
-  "preview_adjustment",
-  "show_bundles",
-  "update_source_entry",
-  "repost_valuation",
-  "column_break_yqnj",
-  "section_current",
-  "qty_on_hand",
-  "current_valuation_rate",
-  "column_break_qgkm",
-  "current_total_value",
-  "section_target",
-  "target_valuation_rate",
-  "target_total_value",
-  "column_break_wtit",
-  "difference_value",
-  "section_source",
-  "source_voucher_type",
-  "source_row_name",
-  "column_break_akim",
-  "source_voucher_no",
-  "source_current_rate",
-  "section_status",
-  "status",
-  "revaluation_document",
-  "riv_document",
-  "remarks",
-  "amended_from"
- ],
- "fields": [
-  {
-   "fieldname": "company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Company",
-   "options": "Company",
-   "reqd": 1
-  },
-  {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Item",
-   "options": "Item",
-   "reqd": 1
-  },
-  {
-   "fieldname": "warehouse",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Warehouse",
-   "options": "Warehouse",
-   "reqd": 1
-  },
-  {
-   "default": "Today",
-   "description": "For reference / documentation. Current Bin values are fetched as of now.",
-   "fieldname": "valuation_date",
-   "fieldtype": "Date",
-   "label": "Valuation Date"
-  },
-  {
-   "bold": 1,
-   "fieldname": "section_current",
-   "fieldtype": "Section Break",
-   "label": "Current Valuation"
-  },
-  {
-   "bold": 1,
-   "description": "Load current Qty and Valuation Rate from Bin",
-   "fieldname": "fetch_current_state",
-   "fieldtype": "Button",
-   "label": "Fetch Current Valuation"
-  },
-  {
-   "fieldname": "qty_on_hand",
-   "fieldtype": "Float",
-   "label": "Qty on Hand",
-   "read_only": 1
-  },
-  {
-   "fieldname": "current_valuation_rate",
-   "fieldtype": "Currency",
-   "label": "Current Valuation Rate",
-   "precision": "9",
-   "read_only": 1
-  },
-  {
-   "fieldname": "current_total_value",
-   "fieldtype": "Currency",
-   "label": "Current Total Value",
-   "precision": "9",
-   "read_only": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "section_target",
-   "fieldtype": "Section Break",
-   "label": "Target Valuation"
-  },
-  {
-   "description": "Desired valuation rate for this Item + Warehouse",
-   "fieldname": "target_valuation_rate",
-   "fieldtype": "Currency",
-   "label": "Target Valuation Rate",
-   "precision": "9"
-  },
-  {
-   "bold": 1,
-   "fieldname": "preview_adjustment",
-   "fieldtype": "Button",
-   "label": "Preview Adjustment"
-  },
-  {
-   "bold": 1,
-   "description": "For serial/batch items, show existing bundles for this Item + Warehouse",
-   "fieldname": "show_bundles",
-   "fieldtype": "Button",
-   "label": "Show Serial/Batch Bundles"
-  },
-  {
-   "fieldname": "target_total_value",
-   "fieldtype": "Currency",
-   "label": "Target Total Value",
-   "read_only": 1
-  },
-  {
-   "description": "(Target Total - Current Total). Positive = increase stock value.",
-   "fieldname": "difference_value",
-   "fieldtype": "Currency",
-   "label": "Difference in Value",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_source",
-   "fieldtype": "Section Break",
-   "label": "Source Entry (Optional)"
-  },
-  {
-   "description": "Original stock-impacting voucher. For now, only Purchase Receipt will be updated.",
-   "fieldname": "source_voucher_type",
-   "fieldtype": "Select",
-   "label": "Source Voucher Type",
-   "options": "Purchase Receipt\nPurchase Invoice\nStock Entry"
-  },
-  {
-   "fieldname": "source_voucher_no",
-   "fieldtype": "Dynamic Link",
-   "label": "Source Voucher No",
-   "options": "source_voucher_type"
-  },
-  {
-   "description": "Child row from the selected Purchase Receipt (auto-filtered by voucher, item, warehouse).",
-   "fieldname": "source_row_name",
-   "fieldtype": "Link",
-   "label": "Source Row Name",
-   "options": "Purchase Receipt Item"
-  },
-  {
-   "description": "Current rate on the source document row.",
-   "fieldname": "source_current_rate",
-   "fieldtype": "Currency",
-   "label": "Source Current Rate",
-   "read_only": 1
-  },
-  {
-   "fieldname": "section_actions",
-   "fieldtype": "Section Break",
-   "label": "Actions"
-  },
-  {
-   "default": "Today",
-   "fieldname": "posting_date",
-   "fieldtype": "Date",
-   "label": "Posting Date"
-  },
-  {
-   "fieldname": "posting_time",
-   "fieldtype": "Time",
-   "label": "Posting Time"
-  },
-  {
-   "bold": 1,
-   "depends_on": "eval:doc.docstatus==1",
-   "fieldname": "repost_valuation",
-   "fieldtype": "Button",
-   "label": "Repost Item Valuation"
-  },
-  {
-   "bold": 1,
-   "depends_on": "eval:doc.docstatus==1",
-   "description": "Update rate on the original Purchase Receipt / source voucher item (no new stock movement).",
-   "fieldname": "update_source_entry",
-   "fieldtype": "Button",
-   "label": "Update Source Entry Rate"
-  },
-  {
-   "fieldname": "section_status",
-   "fieldtype": "Section Break",
-   "label": "Status"
-  },
-  {
-   "default": "Draft",
-   "fieldname": "status",
-   "fieldtype": "Select",
-   "label": "Status",
-   "options": "Draft\nValuation Fetched\nPreviewed\nRevaluation Drafted\nRevaluation Created\nCompleted",
-   "read_only": 1
-  },
-  {
-   "fieldname": "revaluation_document",
-   "fieldtype": "Link",
-   "label": "Stock Reconciliation",
-   "options": "Stock Reconciliation",
-   "read_only": 1
-  },
-  {
-   "fieldname": "riv_document",
-   "fieldtype": "Link",
-   "label": "Repost Item Valuation",
-   "options": "Repost Item Valuation",
-   "read_only": 1
-  },
-  {
-   "fieldname": "remarks",
-   "fieldtype": "Small Text",
-   "label": "Remarks"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Stock Valuation Fix",
-   "print_hide": 1,
-   "read_only": 1,
-   "search_index": 1
-  },
-  {
-   "fieldname": "column_break_orbs",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_qgkm",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_wtit",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_akim",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_yqnj",
-   "fieldtype": "Column Break"
-  }
- ],
- "is_submittable": 1,
- "links": [],
- "modified": "2025-12-04 20:00:00",
- "modified_by": "Administrator",
- "module": "Gl Fix Tool",
- "name": "Stock Valuation Fix",
- "naming_rule": "Expression (old style)",
- "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "submit": 1,
-   "write": 1
-  }
- ],
- "row_format": "Dynamic",
- "rows_threshold_for_grid_search": 20,
- "sort_field": "modified",
- "sort_order": "DESC",
- "states": [],
- "track_changes": 1
+frappe.ui.form.on('Stock Valuation Fix', {
+    refresh(frm) {
+        set_status_indicator(frm);
+
+        const is_submitted = frm.doc.docstatus === 1;
+
+        // Enable / disable Phase 2 buttons
+        frm.toggle_enable('repost_valuation', is_submitted);
+        frm.toggle_enable('update_source_entry', is_submitted);
+
+        // Setup query for Source Row Name (auto-filter by PR + item + warehouse)
+        setup_source_row_query(frm);
+    },
+
+    company(frm) {
+        setup_source_row_query(frm);
+    },
+
+    item_code(frm) {
+        setup_source_row_query(frm);
+    },
+
+    warehouse(frm) {
+        setup_source_row_query(frm);
+    },
+
+    source_voucher_type(frm) {
+        // Clear row when changing voucher type
+        frm.set_value('source_row_name', '');
+        setup_source_row_query(frm);
+    },
+
+    source_voucher_no(frm) {
+        // Clear row when changing voucher no
+        frm.set_value('source_row_name', '');
+        setup_source_row_query(frm);
+    },
+
+    fetch_current_state(frm) {
+        if (!frm.doc.company || !frm.doc.item_code || !frm.doc.warehouse) {
+            frappe.msgprint({
+                message: __('Please set Company, Item and Warehouse first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        frappe.call({
+            method: 'fetch_current_state',
+            doc: frm.doc,
+            freeze: true,
+            freeze_message: __('Fetching current valuation...'),
+            callback: function (r) {
+                if (!r.exc) {
+                    frm.reload_doc();
+                }
+            }
+        });
+    },
+
+    preview_adjustment(frm) {
+        if (!frm.doc.target_valuation_rate) {
+            frappe.msgprint({
+                message: __('Please enter Target Valuation Rate first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        frappe.call({
+            method: 'preview_adjustment',
+            doc: frm.doc,
+            freeze: true,
+            freeze_message: __('Recalculating totals...'),
+            callback: function (r) {
+                if (!r.exc) {
+                    frm.reload_doc();
+                }
+            }
+        });
+    },
+
+    // 🔍 Show Serial/Batch Bundles
+    show_bundles(frm) {
+        if (!frm.doc.item_code || !frm.doc.warehouse) {
+            frappe.msgprint({
+                message: __('Please select Item and Warehouse first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        frappe.call({
+            method: 'get_serial_batch_summary',
+            doc: frm.doc,
+            freeze: true,
+            freeze_message: __('Fetching Serial & Batch Bundles...'),
+            callback: function (r) {
+                // Server shows an HTML table via msgprint.
+            }
+        });
+    },
+
+    // 🧷 Update rate on the original source voucher (e.g. Purchase Receipt Item)
+    update_source_entry(frm) {
+        if (frm.doc.docstatus !== 1) {
+            frappe.msgprint({
+                message: __('Please submit this document first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        if (!frm.doc.source_voucher_type || !frm.doc.source_voucher_no) {
+            frappe.msgprint({
+                message: __('Please set Source Voucher Type and Source Voucher No first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        if (!frm.doc.target_valuation_rate) {
+            frappe.msgprint({
+                message: __('Please enter Target Valuation Rate first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        frappe.confirm(
+            __('This will update the item rate on the original {0} {1}. Continue?', [
+                frm.doc.source_voucher_type,
+                frm.doc.source_voucher_no
+            ]),
+            () => {
+                frappe.call({
+                    method: 'update_source_entry',
+                    doc: frm.doc,
+                    freeze: true,
+                    freeze_message: __('Updating source entry item rate...'),
+                    callback: function (r) {
+                        if (!r.exc) {
+                            frm.reload_doc();
+                            frappe.show_alert({
+                                message: __('Source entry rate updated successfully.'),
+                                indicator: 'green'
+                            });
+                        }
+                    }
+                });
+            }
+        );
+    },
+
+    repost_valuation(frm) {
+        if (frm.doc.docstatus !== 1) {
+            frappe.msgprint({
+                message: __('Please submit this document first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        if (!frm.doc.source_voucher_type || !frm.doc.source_voucher_no) {
+            frappe.msgprint({
+                message: __('Please set Source Voucher Type & Source Voucher No first.'),
+                indicator: 'orange'
+            });
+            return;
+        }
+
+        const target_label = `${frm.doc.source_voucher_type} ${frm.doc.source_voucher_no}`;
+
+        frappe.confirm(
+            __('This will create a Repost Item Valuation document for {0}. Continue?', [target_label]),
+            () => {
+                frappe.call({
+                    method: 'repost_valuation',
+                    doc: frm.doc,
+                    freeze: true,
+                    freeze_message: __('Creating Repost Item Valuation...'),
+                    callback: function (r) {
+                        if (!r.exc) {
+                            frm.reload_doc();
+                            frappe.show_alert({
+                                message: __('Repost Item Valuation created.'),
+                                indicator: 'green'
+                            });
+                        }
+                    }
+                });
+            }
+        );
+    }
+});
+
+function set_status_indicator(frm) {
+    const status = frm.doc.status || 'Draft';
+
+    if (status === 'Completed') {
+        frm.page.set_indicator(__('Completed'), 'green');
+    } else if (status === 'Revaluation Created') {
+        frm.page.set_indicator(__('Revaluation Created'), 'green');
+    } else if (status === 'Revaluation Drafted') {
+        frm.page.set_indicator(__('Revaluation Drafted'), 'orange');
+    } else if (status === 'Previewed') {
+        frm.page.set_indicator(__('Previewed'), 'blue');
+    } else if (status === 'Valuation Fetched') {
+        frm.page.set_indicator(__('Valuation Fetched'), 'blue');
+    } else {
+        frm.page.set_indicator(__('Draft'), 'orange');
+    }
+}
+
+function setup_source_row_query(frm) {
+    // Only meaningful when we are working with Purchase Receipt
+    frm.set_query('source_row_name', function () {
+        if (!frm.doc.source_voucher_type ||
+            frm.doc.source_voucher_type !== 'Purchase Receipt' ||
+            !frm.doc.source_voucher_no) {
+            return {};
+        }
+
+        let filters = {
+            parent: frm.doc.source_voucher_no
+        };
+
+        if (frm.doc.item_code) {
+            filters['item_code'] = frm.doc.item_code;
+        }
+        if (frm.doc.warehouse) {
+            filters['warehouse'] = frm.doc.warehouse;
+        }
+
+        return {
+            filters: filters
+        };
+    });
 }
