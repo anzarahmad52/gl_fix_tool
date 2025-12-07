@@ -1,0 +1,213 @@
+{
+ "actions": [],
+ "allow_import": 1,
+ "autoname": "GLCOR-.YYYY.-.####",
+ "creation": "2025-01-01 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "voucher_type",
+  "voucher_no",
+  "posting_date",
+  "posting_time",
+  "column_break_dex0",
+  "fetch_gl_entries",
+  "apply_gl_updates",
+  "validate_gl",
+  "rollback_gl",
+  "repost_valuation",
+  "section_break_details",
+  "total_debit",
+  "column_break_abmc",
+  "total_credit",
+  "difference",
+  "section_break_zyhn",
+  "entries",
+  "section_break_status",
+  "status",
+  "journal_entry",
+  "remarks",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Voucher Type",
+   "options": "Purchase Receipt\nPurchase Invoice\nStock Entry\nJournal Entry\nSales Invoice\nDelivery Note",
+   "reqd": 1
+  },
+  {
+   "fieldname": "voucher_no",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Voucher No",
+   "options": "voucher_type",
+   "reqd": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Posting Time"
+  },
+  {
+   "bold": 1,
+   "description": "Load GL Entries from selected voucher",
+   "fieldname": "fetch_gl_entries",
+   "fieldtype": "Button",
+   "label": "Fetch Original GL Entries"
+  },
+  {
+   "bold": 1,
+   "description": "DANGER: Directly update existing GL Entries",
+   "fieldname": "apply_gl_updates",
+   "fieldtype": "Button",
+   "label": "Apply GL Updates"
+  },
+  {
+   "bold": 1,
+   "description": "Compare GL Entries with this correction document",
+   "fieldname": "validate_gl",
+   "fieldtype": "Button",
+   "label": "Validate GL"
+  },
+  {
+   "bold": 1,
+   "description": "Restore GL Entries from original snapshot",
+   "fieldname": "rollback_gl",
+   "fieldtype": "Button",
+   "label": "Rollback GL Updates"
+  },
+  {
+   "bold": 1,
+   "description": "Trigger repost for affected items/warehouses",
+   "fieldname": "repost_valuation",
+   "fieldtype": "Button",
+   "label": "Repost Item Valuation"
+  },
+  {
+   "fieldname": "section_break_details",
+   "fieldtype": "Section Break",
+   "label": "Correction Details"
+  },
+  {
+   "fieldname": "total_debit",
+   "fieldtype": "Currency",
+   "label": "Total Debit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_credit",
+   "fieldtype": "Currency",
+   "label": "Total Credit",
+   "read_only": 1
+  },
+  {
+   "description": "Total Debit - Total Credit (must be 0)",
+   "fieldname": "difference",
+   "fieldtype": "Currency",
+   "label": "Difference",
+   "read_only": 1
+  },
+  {
+   "fieldname": "entries",
+   "fieldtype": "Table",
+   "label": "Entries",
+   "options": "GL Correction Line",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_status",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nApplied\nGL Updated\nRolled Back\nCancelled",
+   "read_only": 1
+  },
+  {
+   "fieldname": "journal_entry",
+   "fieldtype": "Link",
+   "label": "Journal Entry",
+   "options": "Journal Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "column_break_dex0",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "GL Correction",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "column_break_abmc",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_zyhn",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-12-03 13:00:27.338794",
+ "modified_by": "anzar.ahmad@ajialtech.com",
+ "module": "Gl Fix Tool",
+ "name": "GL Correction",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "rows_threshold_for_grid_search": 20,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

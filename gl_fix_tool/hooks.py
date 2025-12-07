@@ -43,6 +43,10 @@ app_license = "mit"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
+doctype_js = {
+    "GL Correction": "gl_fix_tool/gl_fix_tool/doctype/gl_correction/gl_correction.js",
+    "Stock Valuation Fix": "gl_fix_tool/gl_fix_tool/doctype/stock_valuation_fix/stock_valuation_fix.js",
+}
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 # doctype_tree_js = {"doctype" : "public/js/doctype_tree.js"}

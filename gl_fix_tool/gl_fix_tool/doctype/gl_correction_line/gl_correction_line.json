@@ -1,0 +1,146 @@
+{
+ "actions": [],
+ "allow_copy": 0,
+ "allow_rename": 0,
+ "creation": "2025-01-01 00:00:00.000000",
+ "custom": 0,
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "account",
+  "party_type",
+  "party",
+  "cost_center",
+  "debit",
+  "credit",
+  "reference_gl_entry",
+  "original_account",
+  "original_cost_center",
+  "original_debit",
+  "original_credit",
+  "original_debit_in_account_currency",
+  "original_credit_in_account_currency",
+  "original_debit_in_transaction_currency",
+  "original_credit_in_transaction_currency"
+ ],
+ "fields": [
+  {
+   "fieldname": "account",
+   "fieldtype": "Link",
+   "label": "Account",
+   "options": "Account",
+   "reqd": 1,
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "Party Type",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Dynamic Link",
+   "label": "Party",
+   "options": "party_type"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "debit",
+   "fieldtype": "Currency",
+   "label": "Debit",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "credit",
+   "fieldtype": "Currency",
+   "label": "Credit",
+   "in_list_view": 1
+  },
+  {
+   "fieldname": "reference_gl_entry",
+   "fieldtype": "Link",
+   "label": "Reference GL Entry",
+   "options": "GL Entry",
+   "description": "Optional: GL entry being corrected"
+  },
+  {
+   "fieldname": "original_account",
+   "fieldtype": "Link",
+   "label": "Original Account",
+   "options": "Account",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_cost_center",
+   "fieldtype": "Link",
+   "label": "Original Cost Center",
+   "options": "Cost Center",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_debit",
+   "fieldtype": "Currency",
+   "label": "Original Debit",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_credit",
+   "fieldtype": "Currency",
+   "label": "Original Credit",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_debit_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Original Debit (Account Currency)",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_credit_in_account_currency",
+   "fieldtype": "Currency",
+   "label": "Original Credit (Account Currency)",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_debit_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Original Debit (Transaction Currency)",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_credit_in_transaction_currency",
+   "fieldtype": "Currency",
+   "label": "Original Credit (Transaction Currency)",
+   "hidden": 1,
+   "read_only": 1
+  }
+ ],
+ "has_web_view": 0,
+ "idx": 0,
+ "istable": 1,
+ "modified": "2025-01-01 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "GL Fix Tool",
+ "name": "GL Correction Line",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 0,
+ "track_changes": 0,
+ "track_seen": 0
+}
