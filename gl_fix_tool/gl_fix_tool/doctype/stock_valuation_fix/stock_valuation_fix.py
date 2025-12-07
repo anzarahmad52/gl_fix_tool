@@ -14,10 +14,9 @@ class StockValuationFix(Document):
     - Allow user to enter target valuation rate
     - Compute target total value & difference
 
-    Phase 2 – two options:
-    A) Create Stock Reconciliation + Repost Item Valuation (legacy)
-    B) Update source voucher item rate (e.g. Purchase Receipt Item)
-       so Repost Item Valuation uses the corrected rate at source.
+    Phase 2 (Recommended):
+    - Update source Purchase Receipt Item rate to match target valuation rate
+    - Run Repost Item Valuation on the same voucher
     """
 
     def validate(self):
@@ -27,7 +26,7 @@ class StockValuationFix(Document):
     def on_submit(self):
         """
         Require that we have at least fetched and previewed
-        an adjustment before allowing dangerous actions.
+        an adjustment before allowing actions.
         """
         if not self.qty_on_hand:
             frappe.throw(
@@ -47,14 +46,17 @@ class StockValuationFix(Document):
         cur_rate = flt(self.current_valuation_rate)
         tgt_rate = flt(self.target_valuation_rate)
 
+        # Current total value
         self.current_total_value = qty * cur_rate if qty and cur_rate else 0
 
+        # Target total value & difference
         if qty and tgt_rate:
             self.target_total_value = qty * tgt_rate
             self.difference_value = self.target_total_value - self.current_total_value
         else:
             self.target_total_value = 0
             self.difference_value = 0
+
     @frappe.whitelist()
     def fetch_current_state(self):
         """
@@ -143,105 +145,81 @@ class StockValuationFix(Document):
         }
 
     @frappe.whitelist()
-    def create_revaluation_entry(self):
+    def get_serial_batch_summary(self):
         """
-        Create a Stock Reconciliation that adjusts valuation for this
-        Item + Warehouse to the target valuation rate, WITHOUT changing qty.
-
-        Logic:
-        - Use current qty_on_hand as the qty in reconciliation
-        - Use target_valuation_rate as the valuation_rate
-        - Let ERPNext post the GL difference
-
-        Behaviour:
-        - For NON serial/batch items: create & submit Stock Reconciliation.
-        - For serial/batch items: DO NOT create on server (validation needs bundle).
-          Instead, return data so the client can open a NEW unsaved Stock
-          Reconciliation form pre-filled with qty & rate, and you can use
-          Serial & Batch Selector there.
+        Show a simple summary of Serial & Batch Bundles for this Item + Warehouse.
+        Purely informational to help the user understand existing bundles.
         """
 
-        if self.docstatus != 1:
-            frappe.throw(_("Please submit this Stock Valuation Fix before creating revaluation."))
+        if not self.item_code or not self.warehouse:
+            frappe.throw(_("Please set Item and Warehouse first."))
 
-        if self.revaluation_document:
-            frappe.throw(
-                _("Revaluation already created: {0}").format(self.revaluation_document)
+        item = frappe.get_doc("Item", self.item_code)
+        if not (getattr(item, "has_serial_no", 0) or getattr(item, "has_batch_no", 0)):
+            frappe.msgprint(
+                _("Item {0} is not serial/batch tracked.").format(self.item_code),
+                alert=True,
+            )
+            return
+
+        # Child table: Serial and Batch Bundle Item
+        rows = frappe.get_all(
+            "Serial and Batch Bundle Item",
+            filters={
+                "item_code": self.item_code,
+                "warehouse": self.warehouse,
+            },
+            fields=[
+                "parent",
+                "warehouse",
+                "qty",
+                "serial_no",
+                "batch_no",
+            ],
+            limit=200,
+        )
+
+        if not rows:
+            frappe.msgprint(
+                _(
+                    "No Serial & Batch Bundles found for Item {0} in Warehouse {1}."
+                ).format(self.item_code, self.warehouse),
+                alert=True,
+            )
+            return
+
+        total_qty = sum(flt(r.qty) for r in rows)
+
+        html = [
+            "<h4>Serial & Batch Bundles</h4>",
+            "<p>Item: <b>{}</b>, Warehouse: <b>{}</b></p>".format(
+                self.item_code, self.warehouse
+            ),
+            "<p>Total Qty in bundles: <b>{}</b></p>".format(total_qty),
+            "<table class='table table-bordered table-condensed'>",
+            "<thead><tr>",
+            "<th>Bundle</th><th>Qty</th><th>Batch</th><th>Serials</th>",
+            "</tr></thead><tbody>",
+        ]
+
+        for r in rows:
+            html.append(
+                "<tr>"
+                "<td>{parent}</td>"
+                "<td style='text-align:right'>{qty}</td>"
+                "<td>{batch}</td>"
+                "<td style='max-width:300px; word-wrap:break-word;'>{serials}</td>"
+                "</tr>".format(
+                    parent=r.parent,
+                    qty=flt(r.qty),
+                    batch=r.batch_no or "",
+                    serials=(r.serial_no or "").replace("\n", ", "),
+                )
             )
 
-        if not self.qty_on_hand:
-            frappe.throw(_("Qty on Hand is zero. Nothing to revalue."))
+        html.append("</tbody></table>")
 
-        if not self.target_valuation_rate:
-            frappe.throw(_("Please set Target Valuation Rate before creating revaluation."))
-
-        self.update_totals()
-        if abs(flt(self.difference_value)) < 0.0001:
-            frappe.throw(_("Difference in value is zero. No revaluation required."))
-
-        item_doc = frappe.get_doc("Item", self.item_code)
-        is_tracked = bool(
-            getattr(item_doc, "has_serial_no", 0) or getattr(item_doc, "has_batch_no", 0)
-        )
-
-        if is_tracked:
-            return {
-                "needs_manual": 1,
-                "company": self.company,
-                "item_code": self.item_code,
-                "warehouse": self.warehouse,
-                "qty": self.qty_on_hand,
-                "valuation_rate": self.target_valuation_rate,
-                "posting_date": self.posting_date or nowdate(),
-                "posting_time": self.posting_time,
-            }
-
-        sr = frappe.new_doc("Stock Reconciliation")
-        sr.company = self.company
-
-        if hasattr(sr, "posting_date"):
-            sr.posting_date = self.posting_date or nowdate()
-        if hasattr(sr, "posting_time") and self.posting_time:
-            sr.posting_time = self.posting_time
-
-        sr.append(
-            "items",
-            {
-                "item_code": self.item_code,
-                "warehouse": self.warehouse,
-                "qty": self.qty_on_hand,
-                "valuation_rate": self.target_valuation_rate,
-            },
-        )
-
-        sr.insert(ignore_permissions=True)
-        sr.submit()
-
-        self.revaluation_document = sr.name
-        self.status = "Revaluation Created"
-        self.save(ignore_permissions=True)
-
-        frappe.msgprint(
-            _(
-                "Stock Reconciliation {0} created for Item {1} in Warehouse {2}. "
-                "Difference in value: {3}. It has been submitted automatically."
-            ).format(
-                sr.name,
-                self.item_code,
-                self.warehouse,
-                self.difference_value,
-            ),
-            alert=True,
-        )
-
-        self.add_comment(
-            "Info",
-            _(
-                "Stock Reconciliation {0} created from Stock Valuation Fix {1}."
-            ).format(sr.name, self.name),
-        )
-
-        return {"revaluation_document": sr.name, "needs_manual": 0}
+        frappe.msgprint("".join(html))
 
     @frappe.whitelist()
     def update_source_entry(self):
@@ -279,6 +257,7 @@ class StockValuationFix(Document):
 
         rows_to_update = []
 
+        # 1) Specific row selected
         if self.source_row_name:
             for row in pr.items:
                 if row.name == self.source_row_name:
@@ -291,6 +270,7 @@ class StockValuationFix(Document):
                     .format(self.source_row_name, pr.name)
                 )
         else:
+            # 2) Auto-select all rows with same item (+ optional warehouse)
             rows_to_update = [
                 row for row in pr.items
                 if row.item_code == self.item_code
@@ -315,6 +295,7 @@ class StockValuationFix(Document):
             if first_old_rate is None:
                 first_old_rate = old_rate
 
+            # Skip if same rate already
             if abs(old_rate - new_rate) < 0.0000001:
                 continue
 
@@ -323,6 +304,7 @@ class StockValuationFix(Document):
             base_rate = new_rate * conversion_rate
             base_amount = amount * conversion_rate
 
+            # Main rate fields
             row.rate = new_rate
             if hasattr(row, "valuation_rate"):
                 row.valuation_rate = new_rate
@@ -346,17 +328,18 @@ class StockValuationFix(Document):
 
         if not updated_rows:
             frappe.msgprint(
-                _("All selected source rows already have the target rate {0}. No change made.").format(new_rate),
+                _("All selected source rows already have the target rate {0}. No change made.")
+                .format(new_rate),
                 alert=True,
             )
             return {"updated": 0, "new_rate": new_rate}
 
+        # Allow update after submit
         pr.flags.ignore_validate_update_after_submit = True
         pr.flags.ignore_mandatory = True
         pr.flags.ignore_links = True
 
         try:
-
             if hasattr(pr, "calculate_taxes_and_totals"):
                 pr.calculate_taxes_and_totals()
         except Exception:
@@ -364,8 +347,10 @@ class StockValuationFix(Document):
 
         pr.save(ignore_permissions=True)
 
+        # Update "Source Current Rate" on this tool for reference
         if first_old_rate is not None:
             self.source_current_rate = first_old_rate
+
         self.flags.ignore_validate_update_after_submit = True
         self.save(ignore_permissions=True)
 
@@ -406,14 +391,10 @@ class StockValuationFix(Document):
     @frappe.whitelist()
     def repost_valuation(self):
         """
-        Create Repost Item Valuation.
+        Create Repost Item Valuation for the source voucher.
 
-        Priority:
-        1) If source_voucher_type/source_voucher_no are set
-           → create RIV for that voucher (e.g. Purchase Receipt we corrected).
-        2) Else if revaluation_document is set
-           → create RIV for Stock Reconciliation (legacy path).
-        3) Else → ask user to set source voucher or create SR.
+        - Requires source_voucher_type + source_voucher_no
+        - Typical use: Purchase Receipt (after we corrected item rate)
         """
 
         if self.docstatus != 1:
@@ -428,27 +409,16 @@ class StockValuationFix(Document):
             self.add_comment("Info", msg)
             return {"created": 0}
 
-        voucher_type = None
-        voucher_no = None
-
-        source_voucher_type = getattr(self, "source_voucher_type", None)
-        source_voucher_no = getattr(self, "source_voucher_no", None)
-
-        if source_voucher_type and source_voucher_no:
-            voucher_type = source_voucher_type
-            voucher_no = source_voucher_no
-
-        elif self.revaluation_document:
-            voucher_type = "Stock Reconciliation"
-            voucher_no = self.revaluation_document
-
-        if not voucher_type or not voucher_no:
+        if not self.source_voucher_type or not self.source_voucher_no:
             frappe.throw(
                 _(
-                    "Please set Source Voucher Type & Source Voucher No, "
-                    "or create a Stock Reconciliation first."
+                    "Please set Source Voucher Type & Source Voucher No "
+                    "before creating Repost Item Valuation."
                 )
             )
+
+        voucher_type = self.source_voucher_type
+        voucher_no = self.source_voucher_no
 
         riv = frappe.new_doc("Repost Item Valuation")
         riv.company = self.company
@@ -480,4 +450,3 @@ class StockValuationFix(Document):
         )
 
         return {"created": 1, "repost_name": riv.name}
-   
