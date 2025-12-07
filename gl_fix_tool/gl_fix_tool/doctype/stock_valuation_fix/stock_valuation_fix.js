@@ -7,33 +7,20 @@ frappe.ui.form.on('Stock Valuation Fix', {
         // Enable / disable Phase 2 buttons
         frm.toggle_enable('repost_valuation', is_submitted);
         frm.toggle_enable('update_source_entry', is_submitted);
-
-        // Setup query for Source Row Name (auto-filter by PR + item + warehouse)
-        setup_source_row_query(frm);
     },
 
-    company(frm) {
-        setup_source_row_query(frm);
-    },
-
-    item_code(frm) {
-        setup_source_row_query(frm);
-    },
-
-    warehouse(frm) {
-        setup_source_row_query(frm);
-    },
+    company(frm) {},
+    item_code(frm) {},
+    warehouse(frm) {},
 
     source_voucher_type(frm) {
-        // Clear row when changing voucher type
+        // When voucher type changes, clear row name
         frm.set_value('source_row_name', '');
-        setup_source_row_query(frm);
     },
 
     source_voucher_no(frm) {
-        // Clear row when changing voucher no
+        // When voucher no changes, clear row name
         frm.set_value('source_row_name', '');
-        setup_source_row_query(frm);
     },
 
     fetch_current_state(frm) {
@@ -80,7 +67,7 @@ frappe.ui.form.on('Stock Valuation Fix', {
         });
     },
 
-    // 🔍 Show Serial/Batch Bundles
+    // 🔍 Show Serial/Batch Bundles (info only)
     show_bundles(frm) {
         if (!frm.doc.item_code || !frm.doc.warehouse) {
             frappe.msgprint({
@@ -96,12 +83,12 @@ frappe.ui.form.on('Stock Valuation Fix', {
             freeze: true,
             freeze_message: __('Fetching Serial & Batch Bundles...'),
             callback: function (r) {
-                // Server shows an HTML table via msgprint.
+                // Server prints the HTML
             }
         });
     },
 
-    // 🧷 Update rate on the original source voucher (e.g. Purchase Receipt Item)
+    // 🧷 Update rate on the original source voucher (Purchase Receipt Item)
     update_source_entry(frm) {
         if (frm.doc.docstatus !== 1) {
             frappe.msgprint({
@@ -210,30 +197,4 @@ function set_status_indicator(frm) {
     } else {
         frm.page.set_indicator(__('Draft'), 'orange');
     }
-}
-
-function setup_source_row_query(frm) {
-    // Only meaningful when we are working with Purchase Receipt
-    frm.set_query('source_row_name', function () {
-        if (!frm.doc.source_voucher_type ||
-            frm.doc.source_voucher_type !== 'Purchase Receipt' ||
-            !frm.doc.source_voucher_no) {
-            return {};
-        }
-
-        let filters = {
-            parent: frm.doc.source_voucher_no
-        };
-
-        if (frm.doc.item_code) {
-            filters['item_code'] = frm.doc.item_code;
-        }
-        if (frm.doc.warehouse) {
-            filters['warehouse'] = frm.doc.warehouse;
-        }
-
-        return {
-            filters: filters
-        };
-    });
 }
