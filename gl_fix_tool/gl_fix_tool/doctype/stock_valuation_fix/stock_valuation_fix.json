@@ -169,7 +169,7 @@
    "description": "Child row from the selected Purchase Receipt (auto-filtered by voucher, item, warehouse).",
    "fieldname": "source_row_name",
    "fieldtype": "Data",
-   "label": "Source Row Name",
+   "label": "Source Row Name"
   },
   {
    "description": "Current rate on the source document row.",
